@@ -25,7 +25,7 @@ def check_ingr(order):
 
     for key in COMP_KEYS:
         if resources[key] < order[key]:
-            print("Sorry, not enough ingredients. Please make another selection")
+            print(f"Sorry, not enough {key}. Please make another selection")
             run()
 
 
