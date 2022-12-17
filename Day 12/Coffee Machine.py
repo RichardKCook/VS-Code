@@ -55,7 +55,11 @@ def run():
     if sel == "off":
         off = True
     elif sel == "report":
-        print(resources)
+        print(f"Water: {resources['water']}mL")
+        print(f"Coffee: {resources['coffee']}g")
+        print(f"Milk: {resources['milk']}mL")
+        money = "{:.2f}".format(resources['money'])
+        print(f"Money: ${money}")
         run()
     elif sel == "espresso" or sel == "latte" or sel == "cappuccino":
 
