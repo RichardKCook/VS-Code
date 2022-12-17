@@ -1,0 +1,57 @@
+def add(a, b):
+    return a + b
+
+
+def sub(a, b):
+    return a - b
+
+
+def div(a, b):
+    return a/b
+
+
+def mul(a, b):
+    return a*b
+
+
+
+
+
+def run():
+    operations = {
+        "+": add,
+        "-": sub,
+        "/": div,
+        "*": mul,
+    }
+    
+    
+    firstLoop = False
+    print("Welcome to the calculator app!")
+    first = float(input("Please enter a number: "))
+    
+    
+    while True:
+        
+        print("\n+\n-\n*\n/\n")
+        op = input("Pick an operation from the line above: ")
+        second = float(input("What's the next number? "))
+
+        calculation_function = operations[op]
+        result = calculation_function(first, second)
+
+        print(f"{first} {op} {second} = {result}")
+
+        cont = input(
+            f"Type 'y' if you'd like to continue calculating with {result}, or type 'n' to return to the begining, or type any other ket to Exit.\n")
+        if cont == "y":
+            first = result
+        elif cont == "n":
+            run()
+        else:
+            print("Exiting....")
+            return
+    
+
+
+run()

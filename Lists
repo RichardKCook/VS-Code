@@ -1,0 +1,13 @@
+duplicated_list = ["bacon", "ham", "bacon", "ham", "eggs", "pancakes", "eggs", "bacon", "eggs", "sausage", "pancakes"]
+
+drinks = ["OJ", "Milk", "Coffee","OJ", "Milk", "Coffee"]
+
+deduplicate = list(set(duplicated_list))
+
+deduplicate.extend(drinks)
+
+deduplicated2 = list(set(deduplicate))
+
+print (duplicated_list)
+print (deduplicate)
+print (deduplicated2)

@@ -1,0 +1,57 @@
+import random
+import os
+
+def easy_mode():
+    """Sets easy attempts"""
+
+    return 10
+
+def hard_mode():
+    """Sets hard attempts"""
+
+    return 5
+
+def run():
+    num = random.choice(range(1, 101))
+    print("Welcome to the Number Guessing Game!\nI'm thinking of a number between 1 and 100.")
+    diff = input(
+        "Choose a difficulty. Type 'easy', 'hard', or 'exit': ").lower()
+
+    if diff == "easy":
+        attempts = easy_mode()
+
+    elif diff == "hard":
+        attempts = hard_mode()
+
+    elif diff == "exit":
+        return ()
+
+    else:
+        print("You made an invalid selection")
+        run()
+
+    guessed_nums = []
+    while attempts > 0:
+        print(f"You have {attempts} attempts remaining.")
+        guess = int(input("Make a guess: "))
+        guessed_nums.append(guess)
+        print(guessed_nums)
+
+        if guess == num:
+            print("You win!\n")
+            run()
+
+        elif guess > num:
+            print("Too high.")
+            attempts -= 1
+
+        elif guess < num:
+            print("Too low.")
+            attempts -= 1
+
+    print(f"You lose!\nThe number was {num}\n")
+
+    run()
+
+os.system("clear")
+run()

@@ -1,0 +1,12 @@
+print(f"Welcome to the Tip Calculator")
+tot = int(input (f"What was the total bill? $"))
+qty = int(input (f"How many people will split the bill? "))
+percent = int(input (f"What percentage would you like to give? Enter an integer "))
+
+adj_percent = int((percent/100)+1)
+
+tot_w_tip = int(tot * adj_percent)
+
+tot_pp = "{:.2f}".format(tot_w_tip/qty)
+
+print(f"Each person should pay ${tot_pp}")
