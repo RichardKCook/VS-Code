@@ -24,7 +24,7 @@ def run():
         attempts = hard_mode()
 
     elif diff == "exit":
-        return ()
+        return None
 
     else:
         print("You made an invalid selection")
