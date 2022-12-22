@@ -23,7 +23,7 @@ def run():
         coffeeMaker = coffee_maker.CoffeeMaker()
         moneymachine = money_machine.MoneyMachine()
 
-        if moneymachine.make_payment(itemOrder,cost) == True:
+        if moneymachine.make_payment(itemOrder.cost) == True:
             coffeeMaker.make_coffee(itemOrder)
 
         else:
