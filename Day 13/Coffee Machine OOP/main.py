@@ -1,36 +1,33 @@
-import coffee_maker
-import menu
-import money_machine
-
-
-def run():
+from coffee_maker import CoffeeMaker
+from menu import Menu, MenuItem
+from money_machine import MoneyMachine
+off = False
+items = Menu()
+selection = items.get_items()
+moneymachine = MoneyMachine()
+coffeeMaker = CoffeeMaker()
+while not off:
 
     order = input(
-        "What would you like to drink? Type 'espresso', 'latte', or 'cappuccino' ")
+        f"What would you like to drink? {selection}: ")
 
     if order == "off":
         off = True
     elif order == "report":
-        sel = coffee_maker.CoffeeMaker()
-        sel.report()
-        profit = money_machine.MoneyMachine()
-        profit.report()
-        run()
+        
+        coffeeMaker.report()
+        
+        moneymachine.report()
+        
     elif order == "espresso" or order == "latte" or order == "cappuccino":
+        
+        itemOrder = items.find_drink(order)
+        
+        if  coffeeMaker.is_resource_sufficient(itemOrder) == True:
 
-        itemMenu = menu.Menu()
-        itemOrder = itemMenu.find_drink(order)
-        coffeeMaker = coffee_maker.CoffeeMaker()
-        moneymachine = money_machine.MoneyMachine()
+            if moneymachine.make_payment(itemOrder.cost) == True:
+                coffeeMaker.make_coffee(itemOrder)
+            
+            
+            
 
-        if moneymachine.make_payment(itemOrder.cost) == True:
-            coffeeMaker.make_coffee(itemOrder)
-
-        else:
-            print("You didn't insert enough money")
-            run()
-
-    return
-
-
-run()
