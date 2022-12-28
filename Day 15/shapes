@@ -1,0 +1,43 @@
+from turtle import Turtle as T
+from turtle import Screen
+from random import choice
+
+
+
+colors = [
+'red', 
+'orange', 
+'yellow', 
+'green', 
+'blue', 
+'indigo', 
+'violet', 
+'medium spring green',
+'black',
+'maroon',
+'indian red',
+'magenta',
+'medium orchid'
+]
+used_colors=[]
+
+
+tim = T()
+tim.shape("turtle")
+tim.color("green")
+for i in range(3,11):
+    color = choice(colors)
+    colors.remove(color)
+    used_colors.append(color)
+    tim.pencolor(color)
+
+    for j in range(0,i):
+        tim.forward(100)
+        tim.left(360/i)
+
+    tim.home()
+
+print(used_colors)
+
+screen = Screen()
+screen.exitonclick()

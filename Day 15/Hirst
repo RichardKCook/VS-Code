@@ -1,0 +1,50 @@
+import colorgram
+from turtle import Turtle as T
+from turtle import Screen
+from turtle import colormode
+from random import choice
+
+
+colormode(255)
+
+timmy = T()
+
+# colors = colorgram.extract("/Users/Cook/Documents/VS Code/Day 15/Hirst.jpg",50)
+# rgb_colors = []
+
+# for color in colors:
+#     r = color.rgb.r
+#     g = color.rgb.g
+#     b = color.rgb.b
+#     new_color = (r,g,b)
+#     rgb_colors.append(new_color)
+
+# print(rgb_colors)
+
+
+color_list = [(248, 247, 244), (245, 246, 249), (247, 243, 246), (240, 247, 243), (198, 161, 125), (55, 101, 148), (130, 168, 193), (230, 211, 127), (157, 62, 80), (193, 146, 171), (60, 120, 90), (134, 182, 151), (135, 84, 68), (195, 94, 80), (183, 89, 104), (163, 209, 177), (109, 41, 56), (218, 176, 200), (81, 159, 120), (31, 61, 111), (172, 188, 222), (39, 53, 79), (81, 128, 181), (69, 154, 164), (156, 203, 210), (72, 38, 52), (214, 181, 174), (153, 176, 73), (110, 43, 39), (68, 57, 45), (26, 91, 60), (72, 65, 51), (49, 72, 75), (35, 69, 51)]
+
+x = -300
+y = -300
+
+timmy.hideturtle()
+timmy.speed("fastest")
+for i in range(0,10):
+    timmy.penup()
+    timmy.setposition(x,y)
+    timmy.dot(20, choice(color_list))
+
+    for j in range(0,10):
+            x = x + 60
+
+            timmy.setposition(x,y)
+            timmy.dot(20, choice(color_list))
+    y = y + 60
+    x = -300
+    timmy.setposition(x,y)
+
+
+
+
+screen = Screen()    
+screen.exitonclick()
