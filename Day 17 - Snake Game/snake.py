@@ -52,11 +52,9 @@ class Snake:
         if self.head.xcor() >= 300 or self.head.xcor() <= -300 or self.head.ycor() >= 300 or self.head.ycor() <= -300:
             Scoreboard().game_over_text()
             return True
-        for piece in self.snake_pieces:
-            if piece == self.head:
-                pass
-
-            elif self.head.distance(piece) < 10:
+        for piece in self.snake_pieces[1:len(self.snake_pieces)]:
+            
+            if self.head.distance(piece) < 10:
                 Scoreboard().game_over_text()
                 return True
 
