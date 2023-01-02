@@ -18,7 +18,7 @@ class Player(T):
         self.write(f"                        Score: \nPlayer 1: {self.score1}                        Player 2: {self.score2}", move=False,
                    align="center", font=("Arial", 16, "normal"))
 
-        if self.score1 > 3 or self.score2 > 3:
+        if self.score1 == 3 or self.score2 == 3:
             self.game_over_text()
             return True
 
