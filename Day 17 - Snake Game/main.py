@@ -2,7 +2,6 @@ from turtle import Screen
 from turtle import mode
 from snake import Snake
 from food import Food
-from scoreboard import Scoreboard
 import time
 
 screen = Screen()
@@ -16,7 +15,6 @@ mode("standard")  # facing east config
 snake = Snake()
 snake.create_snake()
 food = Food()
-scoreboard = Scoreboard()
 
 screen.listen()
 screen.onkey(key="Up", fun=snake.up)
@@ -31,11 +29,13 @@ while not game_over:
     time.sleep(0.1)
     # showing snake piece iff food is eaten. Must come after update due to implementation of snake bites.
     snake.show()
-    game_over = snake.move()
+    snake.move()
+    snake.scoreboard.update_score()
     if snake.head.distance(food) < 15:
         food.refresh()
-        scoreboard.count()
+        snake.scoreboard.count()
         snake.add_bite()
+
 
 
 screen.exitonclick()

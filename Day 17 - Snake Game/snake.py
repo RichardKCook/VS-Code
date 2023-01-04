@@ -1,6 +1,7 @@
 from turtle import Turtle as T
 from scoreboard import Scoreboard
 MOVE_DISTANCE = 20
+STARTING_POSTION = ((0,0), (0,-20), (0,-40))
 
 
 class Snake:
@@ -10,20 +11,22 @@ class Snake:
 
         self.snake_pieces = []
         self.snake_body_postions = []
-
-        self.init_x = 0
-        self.init_y = 0
+        self.scoreboard = Scoreboard()
         self.create_snake()
         self.head = self.snake_pieces[0]
         # removes head from snake to allow for collision check in move method
         self.snake_body = self.snake_pieces[1:len(self.snake_pieces)]
         self.snake_body_postions.pop(0)
+        for bite in self.snake_pieces:
+            for pos in STARTING_POSTION:
+
+                bite.setposition(pos)
 
     def create_snake(self):
         for position in range(2):
             self.add_bite()
             self.show()
-            self.init_x -= 20
+        
 
     def add_bite(self):
 
@@ -32,7 +35,6 @@ class Snake:
         snake_bite.shape("square")
         snake_bite.color("green")
         snake_bite.penup()
-        snake_bite.setposition(self.init_x, self.init_y)
         self.snake_pieces.append(snake_bite)
         self.snake_body_postions.append(snake_bite.pos())
 
@@ -50,13 +52,21 @@ class Snake:
         self.head.forward(MOVE_DISTANCE)
 
         if self.head.xcor() >= 300 or self.head.xcor() <= -300 or self.head.ycor() >= 300 or self.head.ycor() <= -300:
-            Scoreboard().game_over_text()
-            return True
+           
+            return (self.scoreboard.reset() , self.reset())
         for piece in self.snake_pieces[1:len(self.snake_pieces)]:
             
             if self.head.distance(piece) < 10:
-                Scoreboard().game_over_text()
-                return True
+                
+                return (self.scoreboard.reset() , self.reset())
+    
+    def reset(self):
+        for pieces in self.snake_pieces:
+            pieces.goto(700,700)
+        self.snake_pieces.clear()
+        self.create_snake()
+        self.add_bite()
+        self.head = self.snake_pieces[0]
 
     def up(self):
         """Tells the Snake to Move in the Upwards Direction"""
