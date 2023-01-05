@@ -34,3 +34,11 @@ class Check_Answer:
             return True
         else:
             return False
+
+    def states_to_learn(self, guesses):
+        
+        need_to_learn = [state for state in self.state if state not in guesses]
+
+        file = pandas.DataFrame(need_to_learn)
+
+        file.to_csv("States to Learn.csv")
