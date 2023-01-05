@@ -16,9 +16,10 @@ NUM = 0
 GUESSES = []
 while not GAME_OVER:
     is_right = False
-    
-    guess = str(screen.textinput(title=f"{NUM}/50 States Correct", prompt= "Type in the name of US State")).title()
-    
+
+    guess = str(screen.textinput(
+        title=f"{NUM}/50 States Correct", prompt="Type in the name of US State")).title()
+
     is_right = check_answer.is_right(guess)
 
     if is_right == True and guess not in GUESSES:
@@ -27,9 +28,9 @@ while not GAME_OVER:
         NUM += 1
 
     if len(GUESSES) == 50:
-        
+
         print("You win!")
         GAME_OVER = True
-    
+
 
 turtle.exitonclick()
