@@ -1,6 +1,5 @@
 import turtle
 from check_answer import Check_Answer as CA
-import print_name
 
 screen = turtle.Screen()
 screen.title("US States Game")
@@ -31,6 +30,9 @@ while not GAME_OVER:
 
         print("You win!")
         GAME_OVER = True
+    if guess == "Exit":
+        
+        break
 
+check_answer.states_to_learn(GUESSES)
 
-turtle.exitonclick()
