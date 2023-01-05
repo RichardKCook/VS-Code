@@ -17,13 +17,23 @@ class Check_Answer:
         
         if guess in self.state:
 
-            self.row = self.data[self.data.state == guess].to_dict()
+            # self.row = self.data[self.data.state == guess].to_dict()
 
-            xcor = list(self.row["x"[0]].values())
+            # xcor = list(self.row["x"[0]].values())
             
-            ycor = list(self.row["y"[0]].values())
+            # ycor = list(self.row["y"[0]].values())
             
-            print_name.Print_Name(guess, xcor[0], ycor[0])
+
+
+            self.state_data = self.data[self.data.state == guess]
+
+            xcor = int(self.state_data.x)
+
+            ycor = int(self.state_data.y)
+
+
+
+            print_name.Print_Name(guess, xcor, ycor) #removed list brackets at [0] to make work without list/dict
 
             return True
         else:
