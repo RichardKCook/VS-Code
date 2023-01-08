@@ -38,20 +38,28 @@ def write_password():
     ), message=f"These are the details entered: \nEmail: {email_box.get()} \nPassword:{password_box.get()}")
 
     if is_ok == True:
-    
-    
-        with open("/Users/Cook/Documents/VS Code/Day 23 - Password Manager/Password Generator/data.json", mode="r") as f:
-            # Reading data
-            data = json.load(f)
-            # Updating data
-            data.update(new_data)
-            
-        with open("/Users/Cook/Documents/VS Code/Day 23 - Password Manager/Password Generator/data.json", mode="w") as f:
-        #     # Writing updated data
-            json.dump(data, f, indent=4)
+        try:
+            with open("/Users/Cook/Documents/VS Code/Day 23 - Password Manager/Password Generator/data.json", mode="r") as f:
+                # Reading data
+                data = json.load(f)
 
-            website_box.delete(0, END)
-            password_box.delete(0, END)
+        except FileNotFoundError:
+            
+            with open("/Users/Cook/Documents/VS Code/Day 23 - Password Manager/Password Generator/data.json", mode="w") as f:
+
+                # loading data
+                json.dump(new_data, f, indent=4)
+        else:
+                # Updating data
+                data.update(new_data)
+
+                with open("/Users/Cook/Documents/VS Code/Day 23 - Password Manager/Password Generator/data.json", mode="w") as f:
+                    # Writing updated data
+                    json.dump(data, f, indent=4)
+
+        finally:
+                website_box.delete(0, END)
+                password_box.delete(0, END)
 
 
 # ---------------------------- UI SETUP ------------------------------- #
