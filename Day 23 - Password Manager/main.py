@@ -34,6 +34,8 @@ def write_password():
             f.writelines(" | ".join(
                 [website_box.get(), email_box.get(), password_box.get()]))
             f.writelines("\n")
+            website_box.delete(0,END)
+            password_box.delete(0,END)
             f.close()
 
 
