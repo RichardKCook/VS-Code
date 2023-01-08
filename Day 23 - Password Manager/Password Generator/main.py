@@ -34,11 +34,11 @@ def write_password():
             title="Error", message="Please don't leave fields blank or on default values")
         return
 
-    # is_ok = messagebox.askokcancel(title=website_box.get(
-    # ), message=f"These are the details entered: \nEmail: {email_box.get()} \nPassword:{password_box.get()}")
+    is_ok = messagebox.askokcancel(title=website_box.get(
+    ), message=f"These are the details entered: \nEmail: {email_box.get()} \nPassword:{password_box.get()}")
 
-    # if is_ok == True:
-    else:
+    if is_ok == True:
+    
     
         with open("/Users/Cook/Documents/VS Code/Day 23 - Password Manager/Password Generator/data.json", mode="r") as f:
             # Reading data
@@ -49,10 +49,6 @@ def write_password():
         with open("/Users/Cook/Documents/VS Code/Day 23 - Password Manager/Password Generator/data.json", mode="w") as f:
         #     # Writing updated data
             json.dump(data, f, indent=4)
-
-            # f.writelines(" | ".join(
-            #     [website_box.get(), email_box.get(), password_box.get()]))
-            # f.writelines("\n")
 
             website_box.delete(0, END)
             password_box.delete(0, END)
