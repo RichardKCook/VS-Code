@@ -1,6 +1,7 @@
 from tkinter import Tk, Canvas, PhotoImage, Button, Label, Entry, END, Spinbox, messagebox
 import random
 import pyperclip
+import json
 
 PASSWORD_LENGTH = 8
 
@@ -20,23 +21,41 @@ def generate():
 # ---------------------------- SAVE PASSWORD ------------------------------- #
 
 def write_password():
+
+    new_data = {
+        website_box.get(): {
+            "email": email_box.get(),
+            "password": password_box.get()
+        }
+    }
+
     if len(website_box.get()) == 0 or website_box.get() == "Website Placeholder Text" or len(email_box.get()) == 0 or email_box.get() == "You@YourEmail.com" or len(password_box.get()) == 0 or password_box.get() == "Password Placeholder Text":
-        messagebox.showerror(title="Error", message="Please don't leave fields blank or on default values")
+        messagebox.showerror(
+            title="Error", message="Please don't leave fields blank or on default values")
         return
 
-    is_ok = messagebox.askokcancel(title=website_box.get(
-    ), message=f"These are the details entered: \nEmail: {email_box.get()} \nPassword:{password_box.get()}")
+    # is_ok = messagebox.askokcancel(title=website_box.get(
+    # ), message=f"These are the details entered: \nEmail: {email_box.get()} \nPassword:{password_box.get()}")
 
+    # if is_ok == True:
+    else:
     
+        with open("/Users/Cook/Documents/VS Code/Day 23 - Password Manager/Password Generator/data.json", mode="r") as f:
+            # Reading data
+            data = json.load(f)
+            # Updating data
+            data.update(new_data)
+            
+        with open("/Users/Cook/Documents/VS Code/Day 23 - Password Manager/Password Generator/data.json", mode="w") as f:
+        #     # Writing updated data
+            json.dump(data, f, indent=4)
 
-    if is_ok == True:
-        with open("/Users/Cook/Documents/VS Code/Day 23 - Password Manager/passwords.txt", mode="a") as f:
-            f.writelines(" | ".join(
-                [website_box.get(), email_box.get(), password_box.get()]))
-            f.writelines("\n")
-            website_box.delete(0,END)
-            password_box.delete(0,END)
-            f.close()
+            # f.writelines(" | ".join(
+            #     [website_box.get(), email_box.get(), password_box.get()]))
+            # f.writelines("\n")
+
+            website_box.delete(0, END)
+            password_box.delete(0, END)
 
 
 # ---------------------------- UI SETUP ------------------------------- #
@@ -49,7 +68,7 @@ window.minsize()
 # Makes Background, Imports Logo, Places Logo on Screen w/ Grid
 canvas = Canvas(width=200, height=189, highlightthickness=0)
 logo = PhotoImage(
-    file="/Users/Cook/Documents/VS Code/Day 23 - Password Manager/logo.png")
+    file="/Users/Cook/Documents/VS Code/Day 23 - Password Manager/Password Generator/logo.png")
 canvas.create_image(100, 95, image=logo)
 canvas.grid(row=2, column=2)  # need to have this to place images/widgets
 
@@ -86,7 +105,6 @@ def spinbox_used():
     # gets the current value in spinbox.
     global PASSWORD_LENGTH
     PASSWORD_LENGTH = int(spinbox.get())
-    print(spinbox.get())
 
 
 spinbox = Spinbox(from_=8, to=30, width=5, command=spinbox_used)
