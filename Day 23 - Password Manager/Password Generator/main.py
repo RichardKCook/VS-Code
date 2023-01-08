@@ -18,6 +18,9 @@ def generate():
     pyperclip.copy(password_box.get())  # Copies New Password to Clipboard
 
 
+
+
+
 # ---------------------------- SAVE PASSWORD ------------------------------- #
 
 def write_password():
@@ -44,23 +47,39 @@ def write_password():
                 data = json.load(f)
 
         except FileNotFoundError:
-            
+
             with open("/Users/Cook/Documents/VS Code/Day 23 - Password Manager/Password Generator/data.json", mode="w") as f:
 
                 # loading data
                 json.dump(new_data, f, indent=4)
         else:
-                # Updating data
-                data.update(new_data)
+            # Updating data
+            data.update(new_data)
 
-                with open("/Users/Cook/Documents/VS Code/Day 23 - Password Manager/Password Generator/data.json", mode="w") as f:
-                    # Writing updated data
-                    json.dump(data, f, indent=4)
+            with open("/Users/Cook/Documents/VS Code/Day 23 - Password Manager/Password Generator/data.json", mode="w") as f:
+                # Writing updated data
+                json.dump(data, f, indent=4)
 
         finally:
-                website_box.delete(0, END)
-                password_box.delete(0, END)
+            website_box.delete(0, END)
+            password_box.delete(0, END)
 
+
+
+def search():
+    try:
+        with open("/Users/Cook/Documents/VS Code/Day 23 - Password Manager/Password Generator/data.json", mode="r") as f:
+            #Reading data
+            data = json.load(f)
+    except FileNotFoundError:
+        messagebox.showinfo(title="Error", message="File Not Found")
+    else:
+        if website_box.get() in data:
+            email = data[website_box.get()]["email"]
+            password = data[website_box.get()]["password"]
+            messagebox.showinfo(title=website_box.get(), message=f"Email: {email}\nPassword: {password}")
+        else:
+            messagebox.showinfo(title="Error", message=f"No details for {website_box.get()} exist.")
 
 # ---------------------------- UI SETUP ------------------------------- #
 # Makes Window
@@ -83,12 +102,15 @@ execute.grid(row=6, column=3)
 add_button = Button(text="Add", command=write_password)
 add_button.grid(row=7, column=2, columnspan=3, sticky="nsew")
 
+search_button = Button(text="Search", command=search)
+search_button.grid(row=3, column=3, columnspan=2, sticky="nsew")
+
 website_label = Label(text="Website: ")
 website_label.grid(row=3, column=1)
 
 website_box = Entry()
 website_box.insert(END, string="Website Placeholder Text")
-website_box.grid(row=3, column=2, columnspan=3, sticky="nsew")
+website_box.grid(row=3, column=2, sticky="nsew")
 
 email_label = Label(text="Email/Username: ")
 email_label.grid(row=4, column=1)
