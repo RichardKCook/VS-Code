@@ -5,9 +5,10 @@ quote = ''
 
 def get_quote():
     response = requests.get("https://api.kanye.rest/")
+    response.raise_for_status()
     data = response.json()["quote"]
     canvas.itemconfig(quote_text, text=data)
-    return data
+    return
 
 
 
@@ -25,6 +26,6 @@ kanye_img = PhotoImage(file="/Users/Cook/Documents/VS Code/Day 25 - API Usage/Ka
 kanye_button = Button(image=kanye_img, highlightthickness=0, command=get_quote)
 kanye_button.grid(row=1, column=0)
 
-quote = get_quote()
+get_quote()
 
 window.mainloop()
