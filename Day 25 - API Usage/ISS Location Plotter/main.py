@@ -8,9 +8,9 @@ import time
 MY_LAT = 32.779167
 MY_LNG = -96.808891
 
-# with open("/Users/Cook/Documents/API Keys/gMaps API.txt", mode="r") as f:
-#     api_key = f.read()
-#     f.close
+with open("/Users/Cook/Documents/API Keys/Open Weather.txt", mode="r") as f:
+    API_KEY = f.readline()
+    f.close
 
 def get_iss_location():
     response = requests.get(url="http://api.open-notify.org/iss-now.json")
@@ -54,21 +54,42 @@ def main():
 
         iss_latitude = get_iss_location()[0]
         iss_longitude = get_iss_location()[1]
-
+        iss_location = location_connection = requests.get(f"http://api.openweathermap.org/geo/1.0/reverse?lat={iss_latitude}&lon={iss_longitude}&limit=5&appid={API_KEY}")
+        location_connection.raise_for_status()
 
         map1 = folium.Map(location=[iss_latitude, iss_longitude],
                         zoom_start=12, tites="cartodbposition")
 
         map1 # for use with Jupyter
-
+        try:
+            city = iss_location.json()[0]["local_names"]["en"]
+        except KeyError: 
+            city = None
+        except TypeError:
+            city= None
+        except IndexError:
+            pass
+        try:
+            country = iss_location.json()[0]["country"]
+        except TypeError:
+            country = None
+        except IndexError:
+            pass
 
         if (time_now.hour > just_sunset_hour or time_now.hour < just_sunrise_hour) and (MY_LAT - 10 <= iss_latitude <= MY_LAT + 10 and MY_LNG - 10 <= iss_longitude <= MY_LNG + 10):
 
             print(datetime.now(),"The ISS is visable")
 
+        elif iss_location.json() == []:
+            print(datetime.now(),"Sorry, the ISS is not visible, it is over the ocean")
         else:
-            print(datetime.now(),"Sorry, the ISS is not visible")
+            if country == None:
+                print(datetime.now(),f"Sorry, the ISS is not visible, it is over {city}")
+            elif city == None:
+                print(datetime.now(),f"Sorry, the ISS is not visible, it is over {country}")
+            else:
+                print(datetime.now(),f"Sorry, the ISS is not visible, it is over {city}, {country}")
         
-        time.sleep(60)
+        time.sleep(2)
 
 main()
