@@ -62,7 +62,7 @@ def Get_Data(i):
     # print(data['AAPL'].head())
     # print(data["AAPL"])
 
-    qf = cf.QuantFig(data[i])
+    qf = cf.QuantFig(data[i],title= f"{i} Stock Data")
     qf.add_bollinger_bands(boll_std=2)
     # qf.add_macd()
     # qf.add_rsi()
