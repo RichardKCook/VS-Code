@@ -37,11 +37,11 @@ TICKER = "PYPL"
 
 # Get the data
 data = {}
-data['TSLA'] = stock_info.get_data(f"{TICKER}", start_date='01-01-2022',  end_date='01-20-2023')
+data['Stock'] = stock_info.get_data(f"{TICKER}", start_date='01-01-2022',  end_date='01-20-2023')
 # print(data['AAPL'].head())
 # print(data["AAPL"])
 
-qf = cf.QuantFig(data['TSLA'])
+qf = cf.QuantFig(data['Stock'])
 # qf.add_bollinger_bands(boll_std=2)
 # qf.add_macd()
 # qf.add_rsi()
@@ -51,13 +51,13 @@ qf.iplot()
 
 # h= print(data['TSLA'])
 
-i = data['TSLA']
+i = data['Stock']
 
 
 
 
-j = boll(data['TSLA']['close'], include= False, length=14, fillna=True)
-v = adx(data['TSLA'], include= False, length=14, fillna=True)
+j = boll(data['Stock']['close'], include= False, length=14, fillna=True)
+v = adx(data['Stock'], include= False, length=14, fillna=True)
 
 
 
