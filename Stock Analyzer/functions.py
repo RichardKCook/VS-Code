@@ -6,6 +6,7 @@ from plotly.graph_objs import Figure
 from utils import make_list
 
 
+
 class StudyError(Exception):
 	pass
 
@@ -202,7 +203,7 @@ def ema(df,periods=21,column=None,include=True,str='{name}({column},{period})',d
 def dmi(df,periods=14,high='high',low='low',close='close',include=True,str='{name}({period})',**kwargs):
 	return adx(df,periods=periods,high=high,low=low,close=close,di=True,include=include,str=str,**kwargs)
 
-def adx(df,periods=14,high='high',low='low',close='close',di=False,include=True,str='{name}({period})',**kwargs):
+def adx(df,periods=14,high='high',low='low',close='close',di=True,include=True,str='{name}({period})',**kwargs):
 	def _adx(df,periods,high,low,close,include,str,detail):
 		study='ADX'
 		_df=pd.DataFrame()
@@ -435,27 +436,7 @@ def correl(df,periods=21,columns=None,include=True,str=None,detail=False,how='va
 	else:
 		return __df
 
-def boll_print(df,periods=20,boll_std=2,column=None,include=True,str='{name}({column},{period})',detail=False,**boll_kwargs):
-	
-	
-	def _boll(df,periods,column):
-		study='BOLL'
-		df,_df,column=validate(df,column)
 
-		## === talib ==== 
-		# upper,middle,lower=talib.BBANDS(df[column].values,periods,boll_std,boll_std)
-		# _df=pd.DataFrame({'SMA':middle,'UPPER':upper,'LOWER':lower},index=df.index)
-		## === /talib ==== 
-
-		## === pure python ==== 
-		_df['SMA']=df[column].rolling(window=periods).mean()
-		_df['UPPER']=_df['SMA']+df[column].rolling(window=periods).std()*boll_std
-		_df['LOWER']=_df['SMA']-df[column].rolling(window=periods).std()*boll_std
-		## === /pure python ==== 
-
-		return _df['UPPER'],_df['LOWER'],_df['SMA']
-	x,y,z = _boll(df,periods,column)
-	return x,y,z
 
 
 def boll(df,periods=20,boll_std=2,column=None,include=True,str='{name}({column},{period})',detail=False,**boll_kwargs):
