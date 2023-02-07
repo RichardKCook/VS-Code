@@ -33,8 +33,8 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error
 
 
-TICKER = "BAC"
-NUM_OF_TICKERS = 1
+TICKER = "TSLA"
+NUM_OF_TICKERS = 100
 DI_UPPER = 6  # 10-yr GOOG: 31, 10-yr AAPL: 39, Original: 7
 DI_LOWER = 17  # 10-yr GOOG: 32, 10-yr AAPL: 30, Original: 15
 
@@ -44,7 +44,12 @@ global BEST_LOWER
 BEST_LOWER = -100
 global BEST_GAIN
 BEST_GAIN = 0
-
+global running_investment
+running_investment = 0
+global full_cost
+full_cost = 0
+global total_revenue
+total_revenue = 0
 
 watchlist_path = "/Users/Cook/Documents/VS Code/Stock Analyzer/Yahoo Ticker Symbols - September 2017.csv"
 
@@ -61,22 +66,23 @@ def get_ticker_symbols():
 
 def Get_Data(i):
     data = {}
-
-    # data[i] = stock_info.get_data(
-    #     f"{i}", start_date='01-01-2012',  end_date='01-01-2023')
+ 
+    data[i] = stock_info.get_data(
+        f"{i}", start_date='01-01-2015',  end_date='12-31-2022')
+    
 
     # data = {}
-    data[i] = stock_info.get_data(
-        f"{TICKER}", start_date='12-01-2019',  end_date='02-01-2023')
+    # data[i] = stock_info.get_data(
+    #     f"{TICKER}", start_date='12-01-2019',  end_date='02-01-2023')
     # print(data['AAPL'].head())
     # print(data["AAPL"])
 
-    qf = cf.QuantFig(data[i], title=f"{i} Stock Data")
-    # qf.add_bollinger_bands(boll_std=2)
-    qf.add_macd()
-    # # qf.add_rsi()
-    qf.add_dmi()
-    qf.iplot()
+    # qf = cf.QuantFig(data[i], title=f"{i} Stock Data")
+    # # qf.add_bollinger_bands(boll_std=2)
+    # qf.add_macd()
+    # # # qf.add_rsi()
+    # qf.add_dmi()
+    # qf.iplot()
 
     # h= print(data['TSLA'])
 
@@ -119,9 +125,11 @@ def ADX_Results(k):
     adx_results = pd.DataFrame(
         columns=['ADX', 'DI+', 'DI-', 'ADX Condition'])
     for index, row in k.iterrows():
-        if  row['DI-(14)'] >= 33.33 or row['ADX(14)'] > row['DI-(14)'] > row['DI+(14)']:            #elif row['DI-(14)'] > row['DI+(14)'] + DI_LOWER:
+        if row['DI-(14)'] >= 33.33 and row['ADX(14)'] >= row['DI-(14)'] >= row['DI+(14)']:
+            condition = "Hold"
+        elif  row['DI-(14)'] >= 33.33 or row['ADX(14)'] >= row['DI-(14)'] >= row['DI+(14)'] or row['DI-(14)'] >= row['ADX(14)'] >= row['DI+(14)']:            #elif row['DI-(14)'] > row['DI+(14)'] + DI_LOWER:
             condition = "Buy"
-        elif ((((row['DI-(14)']-.1) < row['ADX(14)'] < row['DI+(14)']) ) or (((row['ADX(14)'] > row['DI+(14)']) or row['ADX(14)'] > row['DI-(14)']) and (row['ADX(14)'] - 15 > row['DI+(14)']))):     #and (abs(row['DI+(14)'] - row['ADX(14)'])) < 1                             #if row['DI+(14)'] > row['DI-(14)'] + DI_UPPER:
+        elif ((((row['DI-(14)']-.1) <= row['ADX(14)'] <= row['DI+(14)']) ) or (((row['ADX(14)'] >= row['DI+(14)']) or row['ADX(14)'] >= row['DI-(14)']) and (row['ADX(14)'] - 15 >= row['DI+(14)']))):     #and (abs(row['DI+(14)'] - row['ADX(14)'])) < 1                             #if row['DI+(14)'] > row['DI-(14)'] + DI_UPPER:
             condition = "Sell"
         else:
             condition = "Hold"
@@ -211,21 +219,24 @@ def Analyze_Results():
     running_cost = 0
     cycle_number_of_stocks = 0
     cycle_revenue = 0
+    global cycle_cost
     cycle_cost = 0
     cycle_count = 0
     total_gain = 0
     total_stocks_bought = 0
-    INITIAL_INVESTMENT = 100000
+    global INITIAL_INVESTMENT
+    INITIAL_INVESTMENT = 1000
     is_buying = False
+    
     for index, row in aggr_results.iterrows():
         if row['Aggr Condition'] == "Buy" and not is_buying and INITIAL_INVESTMENT > row["Close"]:
             is_buying = True
             cycle_number_of_stocks = 1
-            total_stocks_bought += 1
+            total_stocks_bought += INITIAL_INVESTMENT / row['Close']
             cycle_count += 1
-            cycle_cost -= row['Close']
-            running_cost -= row['Close']
-            INITIAL_INVESTMENT -= row['Close']
+            cycle_cost -= row['Close'] * total_stocks_bought
+            running_cost -= row['Close'] * total_stocks_bought
+            INITIAL_INVESTMENT -= row['Close'] * total_stocks_bought
             start_date = row['Index']
             print(
                 f"{row['Aggr Condition']} at {round(float(row['Close']),2)} on {row['Index']} with {row['Volume']}")
@@ -235,6 +246,7 @@ def Analyze_Results():
                 is_buying = False
                 cycle_revenue = ((total_stocks_bought) * row['Close'])
                 INITIAL_INVESTMENT += cycle_revenue
+                running_revenue += cycle_revenue
 
                 print(
                     f"{row['Aggr Condition']} at {round(float(row['Close']),2)} on {row['Index']} with {row['Volume']}\n")
@@ -244,7 +256,7 @@ def Analyze_Results():
                 stop_date = row['Index']
                 cycle_number_of_stocks = 0
                 print(
-                    f"The lap gain is {cycle_gain} from {start_date} to {stop_date}\nWith a cost of {round(-cycle_cost,2)}\nAnd a revenue of {round(cycle_revenue,2)}\n")
+                    f"The lap gain is {cycle_gain} from {start_date} to {stop_date}\nWith a cost of {round(-cycle_cost,2)}\nAnd a revenue of {round(cycle_revenue,2)}\nAnd an investment pool of {INITIAL_INVESTMENT}\n")
                 cycle_revenue = 0
                 cycle_cost = 0
                 total_stocks_bought = 0
@@ -255,12 +267,12 @@ def Analyze_Results():
                 # cycle_cost -= row['Close']*cycle_number_of_stocks
                 # running_cost -= row['Close']*cycle_number_of_stocks
                 # INITIAL_INVESTMENT -= row['Close']*cycle_number_of_stocks
-                if row['Aggr Condition'] == "Buy":
-                    cycle_number_of_stocks = 1
-                    total_stocks_bought += cycle_number_of_stocks
-                    cycle_cost -= row['Close']*cycle_number_of_stocks
-                    running_cost -= row['Close']*cycle_number_of_stocks
-                    INITIAL_INVESTMENT -= row['Close']*cycle_number_of_stocks
+                # if row['Aggr Condition'] == "Buy":
+                #     cycle_number_of_stocks = 1
+                #     total_stocks_bought += cycle_number_of_stocks
+                #     cycle_cost -= row['Close']*cycle_number_of_stocks
+                #     running_cost -= row['Close']
+                #     INITIAL_INVESTMENT -= row['Close']*cycle_number_of_stocks
 
                 sold = False
                 print(
@@ -286,8 +298,6 @@ def Analyze_Results():
             f"Average Full Cycle Gain: {round(total_gain/cycle_count,2)} over {cycle_count} cycles\n")
     except ZeroDivisionError:
         print(f"Average Full Cycle Gain: {round(0,2)}\n")
-    print(f"DI Upper for this test is {DI_UPPER}")
-    print(f"DI Lower for this test is {DI_LOWER}\n")
 
     actual_gain = ((running_revenue+running_cost)/(-running_cost))*100
 
@@ -300,17 +310,52 @@ def Analyze_Results():
         BEST_LOWER = DI_LOWER
     print(
         f" The best gain {BEST_GAIN}, with a Best Upper of {BEST_UPPER}, and a Best Lower of {BEST_LOWER}")
+    global running_investment
+    running_investment += INITIAL_INVESTMENT - 100000
+    global full_cost
+    full_cost += -running_cost
+    global total_revenue
+    total_revenue += running_revenue
     print(INITIAL_INVESTMENT)
+    print(f"running cost is {running_cost}")
+    print(f"running revenue is {running_revenue}")
+    print((total_revenue))
+    print((full_cost))
     print(actual_gain)
 
 
 symbols = get_ticker_symbols()
+STOCKS = []
 
+total_analyzed = 1
 for i in symbols:
     ticker = i
     print(ticker)
     stock_data = Get_Data(ticker)
     Analyze_Results()
     print("\n")
-    INITIAL_INVESTMENT = 100000
+    
+    if INITIAL_INVESTMENT > 0:
+        STOCKS.append([ticker, INITIAL_INVESTMENT])
+    if -cycle_cost > 0:
+        STOCKS.append([ticker, -cycle_cost])
+    melded_profit = 0
+    if INITIAL_INVESTMENT > 0:
+        melded_profit += INITIAL_INVESTMENT
+    if -cycle_cost > 0:
+        melded_profit += -cycle_cost
+    
+    for j in range (0, len(STOCKS)-1):
+        melded_profit += STOCKS[j][1]
+    melded_profit = melded_profit/total_analyzed
+
+
+    
+    
+    total_analyzed += 1
+
     BEST_GAIN = -100
+
+    print(STOCKS)
+    print(melded_profit)
+    print(len(STOCKS))
