@@ -21,7 +21,8 @@ np.set_printoptions(threshold=sys.maxsize)
 # Import stock data using yfinance
 NAME = "GOOG"
 df = stock_info.get_data(
-    f"{NAME}", start_date='01-01-2000', end_date='02-09-2023')
+    f"{NAME}", start_date='02-01-2022', end_date='02-10-2023')
+
 df[['Open', 'High', 'Low', 'Close', 'Adj_Close', 'Volume']
    ] = df[['open', 'high', 'low', 'close', 'adjclose', 'volume']]
 df.drop(columns=['open', 'high', 'low', 'close',
@@ -105,7 +106,7 @@ df['DMI_PLUS'], df['DMI_MINUS'] = talib.PLUS_DI(df['High'].values, df['Low'].val
 
 
 # Split data into train and test sets
-train_data = df[df.index <= datetime(2023, 2, 9)].astype(float)
+train_data = df[df.index <= datetime(2023, 2, 10)].astype(float)
 # test_data = df[df.index >= datetime(2020, 1, 1)].astype(float)
 
 # Get the number of datapoints in the train data
@@ -122,7 +123,7 @@ train_data = train_data.iloc[50:, :]
 # test_data = test_data.iloc[-n_data + n_data % 30:, :]
 
 # Get the number of timesteps
-timesteps = 30
+timesteps = 14
 
 # with pd.option_context('display.max_rows', None,
 #                        'display.max_columns', None,
@@ -146,9 +147,10 @@ n_data = train_data_temp.shape[0]
 m_data = y_train_temp.shape[0]
 
 
-# Keep only the last (n-30) datapoints in the train data
-train_data_temp = train_data_temp[-n_data + n_data % 30:, :]
-y_train_temp = y_train_temp[-m_data + m_data % 30:, :]
+
+# # Keep only the last (n-30) datapoints in the train data
+# train_data_temp = train_data_temp[-n_data + n_data % 30:, :]
+# y_train_temp = y_train_temp[-m_data + m_data % 30:, :]
 
 
 
@@ -161,7 +163,7 @@ y_train_temp = scaler.fit_transform(y_train_temp)
 X_train = []
 y_train = []
 
-# Loop over the training data, creating a 30-day window and a next-day prediction for each iteration
+# Loop over the training data, creating an n-day window and a next-day prediction for each iteration
 j = 0
 for i in range(len(train_data_temp)-timesteps):
     j+=1
@@ -207,7 +209,7 @@ prediction = model.predict(X_train_inverted_reshaped)
 
 
 prediction_inverted = scaler.inverse_transform(prediction.reshape(-1, 1))
-print(prediction_inverted)
+# print(prediction_inverted)
 # prediction_reshaped = prediction.reshape(-1, 1)
 # prediction_inverted = scaler.inverse_transform(prediction_reshaped)
 
@@ -217,10 +219,11 @@ print(prediction_inverted)
 # print(y_train_temp)
 
 # Actual data
-actual = train_data['Close'].values
+actual = df['Close'].values
 
 # Predicted data
 prediction_inverted = scaler.inverse_transform(prediction.reshape(-1, 1))
+print(prediction_inverted)
 
 # Create a new x-axis for the predicted values
 x_pred = np.arange(len(actual), len(actual) + len(prediction_inverted))
@@ -228,6 +231,7 @@ x_pred = np.arange(len(actual), len(actual) + len(prediction_inverted))
 # Plot the actual and predicted data
 plt.plot(np.arange(len(actual)), actual, color='red', label='Actual Stock Price')
 plt.plot(x_pred, prediction_inverted, color='blue', label='Predicted Stock Price')
+# plt.plot(test_data['Close'], color='green', label='Test Data')
 plt.title(f'{NAME} Stock Price Prediction')
 plt.xlabel('Time')
 plt.ylabel('Stock Price')

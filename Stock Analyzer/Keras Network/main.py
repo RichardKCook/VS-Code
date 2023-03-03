@@ -119,8 +119,8 @@ for i in range(timesteps, len(train_data_LSTM) - n_future + 1):
     y_train.append(train_data_LSTM[i + n_future - 1:i + n_future, 0])
 X_train, y_train = np.array(X_train), np.array(y_train)
 
-print('X_train shape == {}.'.format(X_train.shape))
-print('y_train shape == {}.'.format(y_train.shape))
+print(f'X_train shape == {X_train.shape}')
+print(f'y_train shape == {y_train.shape}')
 
 model = Sequential()
 model.add(LSTM(units=128, return_sequences=True, input_shape=(X_train.shape[1], X_train.shape[2])))

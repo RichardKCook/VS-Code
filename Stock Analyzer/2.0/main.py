@@ -99,7 +99,8 @@ def Get_Data(i):
     # print(type(i))
 
     # print(type(j))
-
+    with pd.option_context("display.max_rows", 5, "display.max_columns", None):
+        print(k)
     # print(k)
     return k
 
@@ -330,7 +331,6 @@ STOCKS = []
 total_analyzed = 1
 for i in symbols:
     ticker = i
-    print(ticker)
     stock_data = Get_Data(ticker)
     Analyze_Results()
     print("\n")
