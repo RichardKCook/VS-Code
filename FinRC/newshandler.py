@@ -78,6 +78,7 @@ import json
 from datetime import datetime, timedelta
 import pytz
 from time import sleep
+import ujson
 
 API_KEY = "jjhoo2v1s8ia0s9z8dkik8yoj3vjngv0fwvxepdg"
 API_ENDPOINT = "https://stocknewsapi.com/api/v1/category"
@@ -121,29 +122,29 @@ def save_data(data):
     print("Saving data...")
     try:
         with open(FILE_NAME, 'r') as f:
-            existing_data = json.load(f)
+            existing_data = ujson.load(f)
     except FileNotFoundError:
         existing_data = []
 
     # Find new data
-    new_data = []
-    global FIRST_SAVE
-    if FIRST_SAVE:
-        for d in data:
-            if d not in existing_data:
-                new_data.extend(d)
-        FIRST_SAVE = False
-    else:
-        for d in data:
-            if d not in existing_data[-100:]:
-                new_data.extend(d)
+    # new_data = []
+    # global FIRST_SAVE
+    # if FIRST_SAVE:
+    #     for d in data:
+    #         if d not in existing_data:
+    #             new_data.extend(d)
+    #     FIRST_SAVE = False
+    # else:
+    #     for d in data:
+    #         if d not in existing_data[-100:]:
+    #             new_data.extend(d)
 
     # Update data
-    existing_data.extend(new_data)
+    existing_data.extend(data)
 
     # Save data
     with open(FILE_NAME, 'w') as f:
-        json.dump(existing_data, f, indent=4)
+        ujson.dump(existing_data, f, indent=4)
 
     data = []
 
@@ -164,7 +165,7 @@ def start():
 
     #end_date = current_date #use this to gather the most up-to-date data
     try:
-        end_date = datetime.strptime(data[-1]["date"], "%a, %d %b %Y %H:%M:%S %z") - timedelta(days=1) #use this to gather historical data
+        end_date = datetime.strptime(data[-1]["date"], "%a, %d %b %Y %H:%M:%S %z") #use this to gather historical data
     except IndexError:
         end_date = current_date
 
@@ -187,7 +188,7 @@ def start():
             else:
                 break
         start_date = earliest_date - timedelta(days=30)
-        end_date = earliest_date - timedelta(days=1)
+        end_date = earliest_date
 
     # save_data(data)  # Save final data
     print("Finished gathering data.")

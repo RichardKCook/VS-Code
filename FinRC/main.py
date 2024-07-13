@@ -136,7 +136,7 @@ def main() -> int:
             API_SECRET = ALPACA_API_SECRET,
             API_BASE_URL = "https://paper-api.alpaca.markets",
             tech_indicator_list = INDICATORS,
-            turbulence_thresh=70,
+            turbulence_thresh=30,
             max_stock=1e2,
             latency=None,
             state_dim=len(DOW_30_TICKER)  * (len(INDICATORS) + 3)

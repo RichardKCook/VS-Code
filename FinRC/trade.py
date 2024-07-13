@@ -4,6 +4,7 @@ import datetime
 import threading
 import time
 import pytz
+import pickle
 
 import alpaca_trade_api as tradeapi
 import gym
@@ -53,6 +54,7 @@ class AlpacaPaperTrading:
         max_stock=1e2,
         latency=None,
     ):
+        self.model_name = "my_first_model"
         # load agent
         self.drl_lib = drl_lib
         if agent == "ppo":
@@ -157,7 +159,7 @@ class AlpacaPaperTrading:
         elif (
             time_interval == "1D" or time_interval == "1d"
         ):  # bug fix:1D ValueError: Time interval input is NOT supported yet. Maybe any other better ways
-            self.time_interval = 18 * 60 * 60
+            self.time_interval = 15 * 60 * 60
         else:
             raise ValueError("Time interval input is NOT supported yet.")
 
@@ -178,7 +180,8 @@ class AlpacaPaperTrading:
         self.stockUniverse = ticker_list
         self.turbulence_bool = 0
         self.equities = []
-        
+       
+    
 
     def test_latency(self, test_times=10):
         total_time = 0
@@ -213,29 +216,30 @@ class AlpacaPaperTrading:
             # currTime = clock.timestamp.replace(tzinfo=datetime.timezone.utc).timestamp()
             # self.timeToClose = closingTime - currTime
 
-            # if self.timeToClose < (60):
+            # if self.timeToClose < (15):
             #     # Close all positions when 1 minutes til market close.
-            #     print("Market closing soon. Stop trading.")
-            #     break
+            #     # print("Market closing soon. Stop trading.")
+                
 
-            #     """# Close all positions when 1 minutes til market close.
-            # print("Market closing soon.  Closing positions.")
+            # #     """# Close all positions when 1 minutes til market close.
+            # # print("Market closing soon.  Closing positions.")
 
-            # positions = self.alpaca.list_positions()
-            # for position in positions:
-            #   if(position.side == 'long'):
-            #     orderSide = 'sell'
-            #   else:
-            #     orderSide = 'buy'
-            #   qty = abs(int(float(position.qty)))
-            #   respSO = []
-            #   tSubmitOrder = threading.Thread(target=self.submitOrder(qty, position.symbol, orderSide, respSO))
-            #   tSubmitOrder.start()
-            #   tSubmitOrder.join()
+            # # positions = self.alpaca.list_positions()
+            # # for position in positions:
+            # #   if(position.side == 'long'):
+            # #     orderSide = 'sell'
+            # #   else:
+            # #     orderSide = 'buy'
+            # #   qty = abs(int(float(position.qty)))
+            # #   respSO = []
+            # #   tSubmitOrder = threading.Thread(target=self.submitOrder(qty, position.symbol, orderSide, respSO))
+            # #   tSubmitOrder.start()
+            # #   tSubmitOrder.join()
 
             # # Run script again after market close for next trading day.
-            # print("Sleeping until market close (15 minutes).")
-            # time.sleep(60 * 15)"""
+            #     print("Sleeping until market close (15 minutes).")
+            #     time.sleep(60 * 15)
+            
 
             # else:
                 trade = threading.Thread(target=self.trade)
@@ -245,19 +249,22 @@ class AlpacaPaperTrading:
                 cur_time = time.time()
                 self.equities.append([cur_time, last_equity])
                 time.sleep(self.time_interval)
+                self.awaitMarketOpen()
+                
+                
     
     def awaitMarketOpen(self):
         import pandas_market_calendars as mcal
-        nyse = mcal.get_calendar('NYSE')
-        schedule = nyse.schedule(start_date=datetime.datetime.now(), end_date=datetime.datetime.now())
-        is_trading_day = len(schedule) != 0
 
         eastern = pytz.timezone('US/Eastern')
         isOpen = False
         while not isOpen:
+            nyse = mcal.get_calendar('NYSE')
+            schedule = nyse.schedule(start_date=datetime.datetime.now(), end_date=datetime.datetime.now())
+            is_trading_day = len(schedule) != 0
             now = datetime.datetime.now(eastern)
-            if is_trading_day and now.time() >= datetime.time(0, 15) and now.time() <= datetime.time(10, 0):
-                isOpen = True
+            if is_trading_day and now.time() >= datetime.time(9, 45) and now.time() <= datetime.time(16, 0):
+                isOpen = True 
             else:
                 print("Waiting for market to open...")
                 time.sleep(60)
@@ -278,6 +285,7 @@ class AlpacaPaperTrading:
 
         elif self.drl_lib == "stable_baselines3":
             # action = self.model.predict(state)[0]
+
             stock_dimension = len(state.tic.unique())
             state_space = 1 + 2*stock_dimension + len(INDICATORS)*stock_dimension
             buy_cost_list = sell_cost_list = [0.001] * stock_dimension
@@ -294,14 +302,28 @@ class AlpacaPaperTrading:
                             "action_space": stock_dimension,
                             "reward_scaling": 1e-4
                         }
-
-
-            e_trade_gym = StockTradingEnv(df = state, turbulence_threshold = 70,risk_indicator_col='vix', **env_kwargs)
+            try:
+                previous_state = []
+                initial_tf = True
+                # with open('e_trade_gym.pickle', 'rb') as f:
+                #     previous_state = pickle.load(f)
+                #     initial_tf = False
+            except FileNotFoundError:
+                previous_state = []
+                initial_tf = True
+            
+            e_trade_gym = StockTradingEnv(df = state, previous_state= previous_state,turbulence_threshold = 70,risk_indicator_col='vix', **env_kwargs, initial = initial_tf)
+            # save the environment to a file
+            last_state = e_trade_gym.render()
+            df_last_state = pd.DataFrame({"last_state": last_state})
+            df_last_state.to_csv(f"last_state__{datetime.datetime.now()}.csv", index=False)
+            with open('e_trade_gym.pickle', 'wb') as f:
+                pickle.dump(last_state, f)
             df_account_value, action= DRLAgent.DRL_prediction(
-                    model=self.model, 
+                    model=self.model,
                     environment = e_trade_gym)
-            action.index=pd.to_datetime(action.index)
-            action.index = action.index + pd.Timedelta(days=1)
+            
+            action.index = pd.to_datetime(action.index) + pd.Timedelta(days=1)
             print(action)
 
         else:
@@ -364,7 +386,7 @@ class AlpacaPaperTrading:
             self.stocks_cd[:] = 0
 
     def get_state(self):
-        TRADE_START_DATE = '2023-02-24' #must be the trading day before the most recent trading day
+        TRADE_START_DATE = '2023-02-24' #must be the trading day before the most recent trading day when you start
         TRADE_START_DATE = datetime.datetime.strptime(TRADE_START_DATE, '%Y-%m-%d').date()
 
         TRAIN_START_DATE = "2001-01-01"
@@ -378,6 +400,7 @@ class AlpacaPaperTrading:
                      end_date = TRADE_END_DATE,
                      ticker_list = config_tickers.DOW_30_TICKER).fetch_data()
         df.sort_values(['date','tic'],ignore_index=True)
+        
         fe = FeatureEngineer(
                     use_technical_indicator=True,
                     tech_indicator_list = INDICATORS,
@@ -386,6 +409,7 @@ class AlpacaPaperTrading:
                     user_defined_feature = False)
 
         processed = fe.preprocess_data(df)
+        
         list_ticker = processed["tic"].unique().tolist()
         list_date = list(pd.date_range(processed['date'].min(),processed['date'].max()).astype(str))
         combination = list(itertools.product(list_date,list_ticker))
@@ -397,12 +421,15 @@ class AlpacaPaperTrading:
         processed_full = processed_full.fillna(0)
         train = data_split(processed_full, TRAIN_START_DATE,TRAIN_END_DATE)
         trade = data_split(processed_full, TRADE_START_DATE,TRADE_END_DATE)
-        
+
         state = trade
+
+
         return state
 
     def submitOrder(self, qty, stock, side, resp):
         if qty > 0:
+
             try:
                 self.alpaca.submit_order(stock, qty, side, "market", time_in_force="gtc")
                 print(
