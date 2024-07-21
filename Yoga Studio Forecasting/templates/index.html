@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitness Business Analysis</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <style>
+        .spinner {
+            display: none;
+            width: 50px;
+            height: 50px;
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid #3498db;
+            border-radius: 50%;
+            animation: spin 2s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Fitness Business Analysis</h1>
+
+        <h2>Monthly Revenue and Cost Projections</h2>
+        <form id="monthly-form">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Year</th>
+                        <th>Month</th>
+                        <th>Revenue</th>
+                        <th>Cost</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in monthly_df %}
+                    <tr>
+                        <td><input type="text" class="form-control" name="year[]" value="{{ row['Year'] }}"></td>
+                        <td><input type="text" class="form-control" name="month[]" value="{{ row['Month'] }}"></td>
+                        <td><input type="text" class="form-control" name="revenue[]" value="{{ row['Revenue'] }}"></td>
+                        <td><input type="text" class="form-control" name="cost[]" value="{{ row['Cost'] }}"></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <button type="submit" class="btn btn-primary">Update Monthly Data</button>
+        </form>
+
+        <h2>Statistics</h2>
+        <div id="stats-table">{{ stats_table | safe }}</div>
+
+        <h2>Monte Carlo Simulation</h2>
+        <form id="simulation-form">
+            <div class="form-group">
+                <label for="iterations">Iterations:</label>
+                <input type="text" class="form-control" name="iterations" value="1000">
+            </div>
+            <button type="submit" class="btn btn-primary">Run Simulation</button>
+        </form>
+        <div id="simulation-result">
+            <div class="spinner" id="loading-spinner"></div>
+            <div id="simulation-table"></div>
+            <div id="stats-table"></div>
+        </div>
+        <div>
+            <h2>Combined Simulation Distribution</h2>
+            <img id="yearly-simulation-chart" src="{{ url_for('static', filename='monte_carlo_combined_yearly.png') }}" alt="Monte Carlo Combined Simulation - Yearly">
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            $('#monthly-form').on('submit', function (e) {
+                e.preventDefault();
+                $.ajax({
+                    type: 'POST',
+                    url: '/update_monthly_data',
+                    data: $(this).serialize(),
+                    success: function (response) {
+                        updateForms(response.updated_data);
+                        $('#stats-table').html(response.stats_table);
+                    }
+                });
+            });
+
+            $('#simulation-form').on('submit', function (e) {
+                e.preventDefault();
+                $('#loading-spinner').show();
+                $.ajax({
+                    type: 'POST',
+                    url: '/update_simulation',
+                    data: $(this).serialize(),
+                    success: function (response) {
+                        $('#loading-spinner').hide();
+                        $('#simulation-table').html(response.simulation_table);
+                        $('#stats-table').html(response.stats_table);
+                        $('#yearly-simulation-chart').attr('src', 'static/monte_carlo_combined_yearly.png?' + new Date().getTime());
+                    },
+                    error: function () {
+                        $('#loading-spinner').hide();
+                    }
+                });
+            });
+
+            function updateForms(data) {
+                $('input[name="year[]"]').each(function (index) {
+                    $(this).val(data.year[index]);
+                });
+                $('input[name="month[]"]').each(function (index) {
+                    $(this).val(data.month[index]);
+                });
+                $('input[name="revenue[]"]').each(function (index) {
+                    $(this).val(data.revenue[index]);
+                });
+                $('input[name="cost[]"]').each(function (index) {
+                    $(this).val(data.cost[index]);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
