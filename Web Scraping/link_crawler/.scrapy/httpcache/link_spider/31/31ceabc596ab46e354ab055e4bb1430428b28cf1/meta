@@ -1,0 +1,1 @@
+{'url': 'http://quotes.toscrape.com/tag/friends/', 'method': 'GET', 'status': 200, 'response_url': 'http://quotes.toscrape.com/tag/friends/', 'timestamp': 1722081763.123708}
